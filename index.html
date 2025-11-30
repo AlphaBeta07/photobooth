@@ -164,6 +164,42 @@
         .option-btn.selected { background: var(--sepia-dark); color: white; border-color: var(--sepia-dark); }
         .option-btn i { font-size: 1.2rem; display: block; margin-bottom: 4px; }
 
+        /* Frame Options Styling */
+        .frame-options {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            padding: 5px 0;
+            justify-content: center;
+        }
+
+        .frame-radio {
+            display: none; /* Hide default radio */
+        }
+
+        .frame-label {
+            position: relative;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid #ddd;
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-size: cover;
+            background-position: center;
+        }
+
+        .frame-label:hover { transform: scale(1.1); }
+
+        .frame-radio:checked + .frame-label {
+            border-color: var(--sepia-dark);
+            box-shadow: 0 0 0 2px white, 0 0 0 5px var(--sepia-dark);
+            transform: scale(1.1);
+        }
+
+        /* Frame Preview Images (Dynamically set via JS or style tags below) */
+        
         .viewfinder-area {
             position: relative;
             background: #111;
@@ -212,28 +248,25 @@
         /* --- RESULT/GALLERY --- */
         .result-container { text-align: center; }
         .result-stage {
-            max-width: 600px; margin: 0 auto; background: #eee; padding: 20px;
-            box-shadow: var(--shadow-soft); transform: rotate(1deg); background-image: url("data:image/svg+xml,...");
+            max-width: 600px; margin: 0 auto; background: transparent; padding: 20px;
+            box-shadow: none; transform: none;
         }
-        #resultCanvas { max-width: 100%; height: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #resultCanvas { max-width: 100%; height: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
         
         .gallery-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;
         }
         .gallery-item {
-            position: relative; background: white; padding: 10px 10px 40px 10px;
-            box-shadow: var(--shadow-soft); transition: transform 0.2s;
+            position: relative; background: transparent; padding: 0;
+            transition: transform 0.2s;
             cursor: pointer;
         }
         .gallery-item:hover { transform: scale(1.02) rotate(1deg); z-index: 10; }
-        .gallery-item img { width: 100%; display: block; filter: contrast(1.05); }
-        .gallery-date {
-            position: absolute; bottom: 10px; right: 15px; font-family: 'Courier New', monospace;
-            font-size: 0.8rem; color: #555; transform: rotate(-2deg);
-        }
+        .gallery-item img { width: 100%; display: block; box-shadow: var(--shadow-soft); }
+        
         .delete-btn {
             position: absolute; top: -10px; right: -10px; background: #c62828; color: white;
-            width: 25px; height: 25px; border-radius: 50%; border: none; cursor: pointer; display: none;
+            width: 25px; height: 25px; border-radius: 50%; border: none; cursor: pointer; display: none; z-index: 20;
         }
         .gallery-item:hover .delete-btn { display: block; }
 
@@ -359,6 +392,13 @@
                         <div class="option-btn" onclick="setFilter('vintage')">Vintage</div>
                     </div>
                 </div>
+
+                <div class="control-group">
+                    <h3>3. Select Frame</h3>
+                    <div class="frame-options" id="frame-options-container">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
             </div>
 
             <!-- Camera Viewfinder -->
@@ -445,10 +485,202 @@
     </main>
 
     <script>
+        /* --- FRAME ASSETS (SVG Data URIs) --- */
+        // These are self-contained background patterns
+        const frameAssets = [
+            {
+                id: 'simple-white',
+                name: 'Classic White',
+                // Subtle paper texture
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fdfbf7'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'evil-eye',
+                name: 'Evil Eye', // I renamed this from 'Classic White' to match the design
+                // Below is the URL-encoded version of the SVG generated in the previous step
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fdfbf7'/%3E%3Cg%3E%3Ccircle cx='50' cy='50' r='25' fill='%231A3C8C'/%3E%3Ccircle cx='50' cy='50' r='15' fill='%2387CEEB'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23FFFFFF'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='15' cy='20' r='20' fill='%231A3C8C'/%3E%3Ccircle cx='15' cy='20' r='12' fill='%2387CEEB'/%3E%3Ccircle cx='15' cy='20' r='8' fill='%23FFFFFF'/%3E%3Ccircle cx='15' cy='20' r='4' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='85' cy='25' r='22' fill='%231A3C8C'/%3E%3Ccircle cx='85' cy='25' r='13' fill='%2387CEEB'/%3E%3Ccircle cx='85' cy='25' r='9' fill='%23FFFFFF'/%3E%3Ccircle cx='85' cy='25' r='4.5' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='25' cy='80' r='24' fill='%231A3C8C'/%3E%3Ccircle cx='25' cy='80' r='14' fill='%2387CEEB'/%3E%3Ccircle cx='25' cy='80' r='9.5' fill='%23FFFFFF'/%3E%3Ccircle cx='25' cy='80' r='4.8' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='75' cy='75' r='23' fill='%231A3C8C'/%3E%3Ccircle cx='75' cy='75' r='13.5' fill='%2387CEEB'/%3E%3Ccircle cx='75' cy='75' r='9' fill='%23FFFFFF'/%3E%3Ccircle cx='75' cy='75' r='4.6' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'retro-stripes',
+                name: 'Retro Stripes',
+                // Vertical stripes
+                src: `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='%23fce4ec'/%3E%3Cpath d='M0 0h10v40H0zm20 0h10v40H20z' fill='%23f8bbd0' fill-opacity='0.6'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'blue-geo',
+                name: 'Cool Geo',
+                // Blue geometric pattern
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23e1f5fe'/%3E%3Cpath d='M0 0l30 30L0 60zM60 0L30 30l30 30z' fill='%23b3e5fc' fill-opacity='0.5'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'pink-impasto',
+                name: 'Pink Hearts', 
+                // Recreating bg7 (Pink textured hearts)
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23dbc3d0'/%3E%3Cpath d='M30 30 Q30 10 50 25 Q70 10 70 30 Q70 50 50 70 Q30 50 30 30' fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'/%3E%3Cpath d='M-20 80 Q-20 60 0 75 Q20 60 20 80 Q20 100 0 120 Q-20 100 -20 80' fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'/%3E%3Cpath d='M80 80 Q80 60 100 75 Q120 60 120 80 Q120 100 100 120 Q80 100 80 80' fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'boho-leaves',
+                name: 'Boho Leaves',
+                // Recreating bg3 (Abstract leaves)
+                src: `data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='120' fill='%23e8e6da'/%3E%3Cpath d='M60 120 C 30 100 10 60 60 10 C 110 60 90 100 60 120 Z' fill='%23a65e44' opacity='0.9'/%3E%3Cpath d='M60 120 L 60 20' stroke='%23e8e6da' stroke-width='2'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'love-script',
+                name: 'Love Script',
+                // Recreating bg10 (Repeated text)
+                src: `data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='50' fill='%23f2efe9'/%3E%3Ctext x='50' y='35' font-family='cursive' font-weight='bold' font-size='30' text-anchor='middle' fill='%23b31b1b'%3Elove%3C/text%3E%3C/svg%3E`
+            },
+            {
+                id: 'sketch-hearts',
+                name: 'Sketch Hearts',
+                // Recreating bg6 (Tiny scribbled hearts)
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23f7f7f7'/%3E%3Cg fill='none' stroke='%23ff8da1' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 10 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='scale(0.8)'/%3E%3Cpath d='M40 30 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='scale(1)'/%3E%3Cpath d='M20 50 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='scale(0.9)'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'kraft-red',
+                name: 'Kraft Love',
+                // Recreating bg9 (Brown paper red hearts)
+                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23d4bda5'/%3E%3Cg fill='%239e1b1b'%3E%3Cpath d='M10 20 Q10 10 20 20 Q30 10 30 20 Q30 30 20 40 Q10 30 10 20' transform='scale(0.5)'/%3E%3Cpath d='M90 60 Q90 50 100 60 Q110 50 110 60 Q110 70 100 80 Q90 70 90 60' transform='scale(0.5)'/%3E%3Cpath d='M60 90 Q60 80 70 90 Q80 80 80 90 Q80 100 70 110 Q60 100 60 90' transform='scale(0.6)'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'blue-plaid',
+                name: 'Blue Plaid',
+                // Recreating bg11 (Blue grid)
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3Crect x='0' y='20' width='100' height='15' fill='%23add8e6' opacity='0.6'/%3E%3Crect x='0' y='60' width='100' height='15' fill='%23add8e6' opacity='0.6'/%3E%3Crect x='20' y='0' width='15' height='100' fill='%2387cefa' opacity='0.6'/%3E%3Crect x='60' y='0' width='15' height='100' fill='%2387cefa' opacity='0.6'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'retro-choco',
+                name: 'Choco Swirl',
+                // Recreating bg2 (Retro brown hearts)
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%234e342e'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%238d6e63' stroke-width='8'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%23d7ccc8' stroke-width='3' transform='scale(0.6) translate(35 35)'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'line-leaves',
+                name: 'Line Art',
+                // Recreating bg5 (Minimalist leaves)
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f5f0eb'/%3E%3Cpath d='M50 100 Q50 50 90 10' fill='none' stroke='%23a1887f' stroke-width='1.5'/%3E%3Cpath d='M50 80 Q70 60 80 40' fill='none' stroke='%23a1887f' stroke-width='1'/%3E%3Cpath d='M50 60 Q30 40 20 20' fill='none' stroke='%23a1887f' stroke-width='1'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'gold-speckle',
+                name: 'Gold Dust',
+                // Gold specs on cream
+                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23fff8e1'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23ffecb3'/%3E%3Ccircle cx='50' cy='40' r='3' fill='%23ffe082'/%3E%3Ccircle cx='20' cy='60' r='2' fill='%23ffecb3'/%3E%3Ccircle cx='70' cy='20' r='2' fill='%23ffe082'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'cow-print',
+                name: 'Moo Print',
+                // Trendy Cow Pattern
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3Cpath d='M10 10 Q20 0 30 10 Q40 20 30 30 Q20 40 10 30 Q0 20 10 10' fill='%23000000'/%3E%3Cpath d='M60 50 Q75 40 85 55 Q90 70 75 80 Q60 90 50 75 Q45 60 60 50' fill='%23000000'/%3E%3Cpath d='M80 10 Q95 5 100 20 L100 0 L80 0 Z' fill='%23000000'/%3E%3Cpath d='M10 80 Q25 70 35 85 Q40 95 30 100 L0 100 L0 90 Z' fill='%23000000'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'dreamy-clouds',
+                name: 'Dreamy Sky',
+                // Soft blue sky with white clouds
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%2389CFF0'/%3E%3Cg fill='%23ffffff' opacity='0.8'%3E%3Ccircle cx='20' cy='30' r='10'/%3E%3Ccircle cx='35' cy='35' r='12'/%3E%3Ccircle cx='10' cy='35' r='8'/%3E%3Ccircle cx='25' cy='40' r='10'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='0.8' transform='translate(50, 40)'%3E%3Ccircle cx='20' cy='30' r='10'/%3E%3Ccircle cx='35' cy='35' r='12'/%3E%3Ccircle cx='10' cy='35' r='8'/%3E%3Ccircle cx='25' cy='40' r='10'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'retro-checkers',
+                name: 'Vans Check',
+                // Classic Black & White Checkers
+                src: `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='%23ffffff'/%3E%3Crect width='20' height='20' fill='%231a1a1a'/%3E%3Crect x='20' y='20' width='20' height='20' fill='%231a1a1a'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'groovy-waves',
+                name: '70s Groovy',
+                // Orange and yellow wavy lines
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fefae0'/%3E%3Cpath d='M0 20 Q25 40 50 20 T100 20' fill='none' stroke='%23e76f51' stroke-width='5'/%3E%3Cpath d='M0 40 Q25 60 50 40 T100 40' fill='none' stroke='%23f4a261' stroke-width='5'/%3E%3Cpath d='M0 60 Q25 80 50 60 T100 60' fill='none' stroke='%23e9c46a' stroke-width='5'/%3E%3Cpath d='M0 80 Q25 100 50 80 T100 80' fill='none' stroke='%232a9d8f' stroke-width='5'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'happy-daisies',
+                name: 'Daisy Field',
+                // Green background with simple white flowers
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23a7c957'/%3E%3Cg transform='translate(30,30)'%3E%3Ccircle r='5' fill='%23ffe66d'/%3E%3Ccircle cx='0' cy='-8' r='4' fill='%23fff'/%3E%3Ccircle cx='6' cy='-5' r='4' fill='%23fff'/%3E%3Ccircle cx='7' cy='3' r='4' fill='%23fff'/%3E%3Ccircle cx='3' cy='8' r='4' fill='%23fff'/%3E%3Ccircle cx='-5' cy='7' r='4' fill='%23fff'/%3E%3Ccircle cx='-8' cy='0' r='4' fill='%23fff'/%3E%3Ccircle cx='-6' cy='-6' r='4' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'cottage-shrooms',
+                name: 'Mushrooms',
+                // Cream bg with cute red mushrooms
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23fefcf5'/%3E%3Cg transform='translate(15,35)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='6' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='14' cy='6' r='1' fill='white'/%3E%3C/g%3E%3Cg transform='translate(40,15) scale(0.8)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='10' cy='4' r='1.5' fill='white'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'cherry-bomb',
+                name: 'Cherry Bomb',
+                // Soft pink with red cherries
+                src: `data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='50' height='50' fill='%23ffeef2'/%3E%3Cg transform='translate(15,15)'%3E%3Cpath d='M10 5 Q15 0 20 5 L20 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Cpath d='M10 5 L5 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='18' r='4' fill='%23e91e63'/%3E%3Ccircle cx='20' cy='18' r='4' fill='%23e91e63'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'fresh-lemons',
+                name: 'Lemonade',
+                // Mint green with yellow lemons
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23e0f2f1'/%3E%3Cg transform='translate(10,10) rotate(45)'%3E%3Cellipse cx='15' cy='10' rx='10' ry='7' fill='%23ffeb3b'/%3E%3Ccircle cx='5' cy='10' r='1' fill='%23fbc02d'/%3E%3Ccircle cx='25' cy='10' r='1' fill='%23fbc02d'/%3E%3Cpath d='M15 3 Q20 0 25 3' fill='none' stroke='%234caf50' stroke-width='2'/%3E%3Cpath d='M15 3 Q10 0 15 -5 Q20 0 15 3' fill='%238bc34a'/%3E%3C/g%3E%3C/svg%3E`
+            },
+
+            // --- Y2K & RETRO ---
+            {
+                id: 'y2k-butterflies',
+                name: 'Fairycore',
+                // Lilac with purple butterflies
+                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23f3e5f5'/%3E%3Cg transform='translate(20,20)'%3E%3Cellipse cx='10' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(-30 10 10)'/%3E%3Cellipse cx='22' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(30 22 10)'/%3E%3Cellipse cx='12' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(-15 12 20)'/%3E%3Cellipse cx='20' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(15 20 20)'/%3E%3Crect x='15' y='8' width='2' height='16' rx='1' fill='%234a148c'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
+                id: 'retro-smiley',
+                name: 'Happy Vibes',
+                // Yellow check with smileys
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23fff9c4'/%3E%3Ccircle cx='30' cy='30' r='12' fill='%23ffeb3b'/%3E%3Ccircle cx='26' cy='28' r='1.5' fill='%23000'/%3E%3Ccircle cx='34' cy='28' r='1.5' fill='%23000'/%3E%3Cpath d='M26 34 Q30 38 34 34' stroke='%23000' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'yin-yang-90s',
+                name: '90s Balance',
+                // Purple background with Yin Yangs
+                src: `data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='50' height='50' fill='%23e1bee7'/%3E%3Cg transform='translate(15,15)'%3E%3Ccircle cx='10' cy='10' r='10' fill='white'/%3E%3Cpath d='M10 0 A10 10 0 0 1 10 20 A5 5 0 0 1 10 10 A5 5 0 0 0 10 0' fill='black'/%3E%3Ccircle cx='10' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='10' cy='15' r='1.5' fill='black'/%3E%3C/g%3E%3C/svg%3E`
+            },
+
+            // --- AESTHETIC & TEXTURE ---
+            {
+                id: 'terrazzo-stone',
+                name: 'Terrazzo',
+                // Modern stone speckles
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Cpath d='M10 10 L20 15 L15 25 L5 20 Z' fill='%23ef9a9a'/%3E%3Cpath d='M40 50 L50 40 L60 55 Z' fill='%2390caf9'/%3E%3Cpath d='M70 10 L80 10 L85 20 L75 25 Z' fill='%23a5d6a7'/%3E%3Cpath d='M20 70 L30 80 L10 85 Z' fill='%23ffcc80'/%3E%3Ccircle cx='50' cy='80' r='4' fill='%23bcaaa4'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'midnight-stars',
+                name: 'Galaxy',
+                // Dark blue with gold stars
+                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%231a237e'/%3E%3Cpath d='M40 20 L42 26 L48 26 L43 30 L45 36 L40 32 L35 36 L37 30 L32 26 L38 26 Z' fill='%23fff176'/%3E%3Ccircle cx='15' cy='60' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='60' cy='10' r='1.5' fill='white' opacity='0.5'/%3E%3Cpath d='M70 60 L71 63 L74 63 L71.5 65 L72.5 68 L70 66 L67.5 68 L68.5 65 L66 63 L69 63 Z' fill='%23fff176' transform='scale(0.8)'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'leopard-chic',
+                name: 'Wild Side',
+                // Beige animal print
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23d7ccc8'/%3E%3Cpath d='M20 20 Q25 15 30 20 Q30 25 25 25 Q20 25 20 20' fill='%235d4037'/%3E%3Cpath d='M60 40 Q65 35 70 45 Q60 55 55 45' fill='%235d4037'/%3E%3Cpath d='M10 70 Q15 65 20 75 Q15 85 10 75' fill='%235d4037'/%3E%3Cpath d='M80 80 Q90 75 95 85 Q90 95 80 90' fill='%235d4037'/%3E%3Ccircle cx='45' cy='25' r='3' fill='%238d6e63'/%3E%3Ccircle cx='75' cy='60' r='3' fill='%238d6e63'/%3E%3C/svg%3E`
+            },
+
+            // --- MINIMALIST ---
+            {
+                id: 'sage-grid',
+                name: 'Sage Graph',
+                // Aesthetic green grid
+                src: `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='%23f1f8e9'/%3E%3Cpath d='M0 0 L40 0' stroke='%23a5d6a7' stroke-width='1'/%3E%3Cpath d='M0 0 L0 40' stroke='%23a5d6a7' stroke-width='1'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'organic-shapes',
+                name: 'Matisse',
+                // Abstract organic blobs
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fff3e0'/%3E%3Cpath d='M10 20 Q30 0 50 20 T90 20' fill='none' stroke='%23ffab91' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M20 60 Q40 40 60 60 T90 50' fill='none' stroke='%2380cbc4' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='30' cy='80' r='5' fill='%23ffab91'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'cyber-glitch',
+                name: 'Cyberpunk',
+                // Black with neon green digital rain feel
+                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23111'/%3E%3Crect x='10' y='10' width='5' height='15' fill='%230f0' opacity='0.7'/%3E%3Crect x='30' y='30' width='5' height='10' fill='%230f0' opacity='0.5'/%3E%3Crect x='50' y='5' width='5' height='20' fill='%230f0' opacity='0.3'/%3E%3Crect x='20' y='50' width='5' height='5' fill='%230f0' opacity='0.9'/%3E%3C/svg%3E`
+            }
+        ];
+
         /* --- STATE & VARIABLES --- */
         const state = {
             currentLayout: 'strip', // strip, grid, single
             currentFilter: 'sepia',
+            currentFrameId: 'simple-white', 
             photos: [], // Stores temp blobs for current session
             isCapturing: false
         };
@@ -459,11 +691,41 @@
             canvas: document.getElementById('resultCanvas'),
             flash: document.getElementById('flash'),
             countdown: document.getElementById('countdown'),
-            galleryGrid: document.getElementById('gallery-grid')
+            galleryGrid: document.getElementById('gallery-grid'),
+            frameOptionsContainer: document.getElementById('frame-options-container')
         };
 
         const ctx = elements.canvas.getContext('2d');
         let stream = null;
+
+        /* --- INIT --- */
+        function initFrameOptions() {
+            elements.frameOptionsContainer.innerHTML = '';
+            frameAssets.forEach((frame, index) => {
+                const checked = index === 0 ? 'checked' : '';
+                
+                // Create the radio input
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'frame';
+                input.id = `frame-${frame.id}`;
+                input.className = 'frame-radio';
+                input.value = frame.id;
+                if(index === 0) input.checked = true;
+                input.onchange = () => setFrame(frame.id);
+
+                // Create the label (preview)
+                const label = document.createElement('label');
+                label.htmlFor = `frame-${frame.id}`;
+                label.className = 'frame-label';
+                label.title = frame.name;
+                // Use the SVG data URI as the background for the preview circle
+                label.style.backgroundImage = `url("${frame.src}")`;
+
+                elements.frameOptionsContainer.appendChild(input);
+                elements.frameOptionsContainer.appendChild(label);
+            });
+        }
 
         /* --- NAVIGATION --- */
         function navTo(pageId) {
@@ -513,14 +775,15 @@
 
         function setFilter(filter) {
             state.currentFilter = filter;
-            // Remove old filter classes
             elements.viewfinder.classList.remove('filter-sepia', 'filter-bw', 'filter-vintage', 'filter-none', 'filter-warm');
-            // Add new
             elements.viewfinder.classList.add('filter-' + filter);
             
-            // Update buttons
             document.querySelectorAll('.filter-options .option-btn').forEach(b => b.classList.remove('selected'));
             event.target.classList.add('selected');
+        }
+
+        function setFrame(id) {
+            state.currentFrameId = id;
         }
 
         /* --- CAPTURE SEQUENCE --- */
@@ -538,11 +801,10 @@
                 triggerFlash();
                 const shot = captureFrame();
                 state.photos.push(shot);
-                // Small delay between shots
                 if (i < shotsNeeded - 1) await new Promise(r => setTimeout(r, 1000));
             }
 
-            renderFinalComposition();
+            await renderFinalComposition();
             navTo('result');
             state.isCapturing = false;
         }
@@ -576,31 +838,29 @@
         }
 
         function captureFrame() {
-            // Capture raw frame to an offscreen canvas
             const offCanvas = document.createElement('canvas');
             offCanvas.width = elements.video.videoWidth;
             offCanvas.height = elements.video.videoHeight;
             const offCtx = offCanvas.getContext('2d');
             
-            // Mirror logic to match video
+            // Mirror logic
             offCtx.translate(offCanvas.width, 0);
             offCtx.scale(-1, 1);
-            
             offCtx.drawImage(elements.video, 0, 0);
             return offCanvas;
         }
 
         /* --- COMPOSITION & RENDERING --- */
-        function renderFinalComposition() {
+        async function renderFinalComposition() {
             const photos = state.photos;
             const layout = state.currentLayout;
             
-            // Base config
+            // Find current frame asset
+            const frameObj = frameAssets.find(f => f.id === state.currentFrameId) || frameAssets[0];
+            
             const photoW = 300;
             const photoH = 300; 
             const padding = 30;
-            const border = 15;
-            const headerHeight = 0;
             const footerHeight = 80;
 
             let canvasW, canvasH;
@@ -611,7 +871,7 @@
                 canvasH = photoH + (padding * 2) + footerHeight;
             } else if (layout === 'strip') {
                 canvasW = photoW + (padding * 2);
-                canvasH = (photoH * 3) + (padding * 4) + footerHeight; // 3 photos vertical
+                canvasH = (photoH * 3) + (padding * 4) + footerHeight;
             } else if (layout === 'grid') {
                 canvasW = (photoW * 2) + (padding * 3);
                 canvasH = (photoH * 2) + (padding * 3) + footerHeight;
@@ -620,9 +880,18 @@
             elements.canvas.width = canvasW;
             elements.canvas.height = canvasH;
 
-            // Background
-            ctx.fillStyle = '#fdfbf7'; // Photo paper white
-            ctx.fillRect(0, 0, canvasW, canvasH);
+            // --- DRAW BACKGROUND IMAGE (FRAME PATTERN) ---
+            // We use a pattern repeat for the background
+            try {
+                const bgPattern = await loadPattern(frameObj.src);
+                ctx.fillStyle = ctx.createPattern(bgPattern, 'repeat');
+                ctx.fillRect(0, 0, canvasW, canvasH);
+            } catch (e) {
+                // Fallback
+                console.error("Pattern load failed", e);
+                ctx.fillStyle = '#fdfbf7';
+                ctx.fillRect(0, 0, canvasW, canvasH);
+            }
             
             // Apply Global Filter to Context before drawing images
             applyContextFilter();
@@ -630,19 +899,17 @@
             // Draw Photos
             if (layout === 'single') {
                 ctx.drawImage(photos[0], padding, padding, photoW, photoH);
-                drawFrameBorder(padding, padding, photoW, photoH);
+                drawPhotoBorder(padding, padding, photoW, photoH);
             } 
             else if (layout === 'strip') {
                 let y = padding;
                 photos.forEach(photo => {
                     ctx.drawImage(photo, padding, y, photoW, photoH);
-                    drawFrameBorder(padding, y, photoW, photoH);
+                    drawPhotoBorder(padding, y, photoW, photoH);
                     y += photoH + padding;
                 });
             } 
             else if (layout === 'grid') {
-                // 0 1
-                // 2 3
                 const positions = [
                     { x: padding, y: padding },
                     { x: padding*2 + photoW, y: padding },
@@ -652,26 +919,38 @@
                 photos.forEach((photo, i) => {
                     if(positions[i]) {
                         ctx.drawImage(photo, positions[i].x, positions[i].y, photoW, photoH);
-                        drawFrameBorder(positions[i].x, positions[i].y, photoW, photoH);
+                        drawPhotoBorder(positions[i].x, positions[i].y, photoW, photoH);
                     }
                 });
             }
 
-            // Reset Filter for Text/Logo
-            // ctx.filter = 'none';
+             // Reset Filter for Text
+            //  ctx.filter = 'none';
 
-            // // Add Logo/Date Footer
-            // ctx.fillStyle = '#333';
-            // ctx.font = 'bold 24px "Playfair Display"';
-            // ctx.textAlign = 'center';
-            // const dateStr = new Date().toLocaleDateString();
-            
-            // Draw text at bottom
-            // const footerY = canvasH - (footerHeight/2) + 8;
-            // ctx.fillText(`RETRO BOOTH • ${dateStr}`, canvasW / 2, footerY);
+            //  // Add Footer Date
+            //  ctx.font = 'bold 16px "Playfair Display"';
+            //  ctx.textAlign = 'center';
+             
+            //  // Smart text color based on frame ID
+            //  if(frameObj.id === 'dark-film') ctx.fillStyle = '#aaa';
+            //  else ctx.fillStyle = '#333';
 
-            // Add Grain Overlay (Noise)
+            //  const dateStr = new Date().toLocaleDateString();
+            //  const footerY = canvasH - (footerHeight/2) + 8;
+            //  ctx.fillText(`RETRO BOOTH • ${dateStr}`, canvasW / 2, footerY);
+
+            // Add Grain Overlay
             addNoiseToCanvas();
+        }
+
+        // Helper to load image for pattern
+        function loadPattern(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
         }
 
         function applyContextFilter() {
@@ -682,50 +961,26 @@
             else ctx.filter = 'none';
         }
 
-        function drawFrameBorder(x, y, w, h) {
-            // Optional: Draw a subtle inner shadow or border on the photo itself
+        function drawPhotoBorder(x, y, w, h) {
+            // Inner border for photo definition
             ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 1;
             ctx.strokeRect(x, y, w, h);
         }
 
         function addNoiseToCanvas() {
-            // Generate random noise on top
             const w = elements.canvas.width;
             const h = elements.canvas.height;
             const iData = ctx.getImageData(0, 0, w, h);
             const data = iData.data;
             
             for (let i = 0; i < data.length; i += 4) {
-                const noise = (Math.random() - 0.5) * 15; // Noise strength
+                const noise = (Math.random() - 0.5) * 15;
                 data[i] += noise;
                 data[i+1] += noise;
                 data[i+2] += noise;
             }
             ctx.putImageData(iData, 0, 0);
-        }
-
-        /* --- STICKERS --- */
-        function addSticker(type) {
-            const w = elements.canvas.width;
-            const h = elements.canvas.height;
-            
-            ctx.save();
-            ctx.translate(w/2, h/2);
-            ctx.rotate((Math.random() - 0.5) * 0.5); // Random tilt
-            
-            if(type === 'DATE') {
-                ctx.font = '20px "Courier New"';
-                ctx.fillStyle = '#ff5722';
-                ctx.fillText(new Date().toLocaleDateString(), 0, 0);
-            } else {
-                ctx.font = '60px serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(type, 0, 0);
-            }
-            
-            ctx.restore();
         }
 
         /* --- POST-PROCESS & SAVING --- */
@@ -770,11 +1025,9 @@
                 div.innerHTML = `
                     <button class="delete-btn" onclick="deletePhoto(${item.id})">×</button>
                     <img src="${item.data}" alt="Photobooth Strip">
-                    
                 `;
                 div.onclick = (e) => {
                     if(!e.target.classList.contains('delete-btn')) {
-                        // View large logic could go here
                         const link = document.createElement('a');
                         link.download = 'retro-photo.png';
                         // link.href = item.data;
@@ -794,6 +1047,7 @@
         }
 
         // Init
+        initFrameOptions();
         navTo('home');
 
     </script>
