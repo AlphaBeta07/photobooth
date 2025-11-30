@@ -151,6 +151,8 @@
             flex-direction: column;
             gap: 1.5rem;
             border: 1px solid #e0d0b8;
+            overflow-y: auto; /* Added for many frames */
+            max-height: 80vh;
         }
 
         .control-group h3 { font-family: var(--font-head); margin-bottom: 0.8rem; font-size: 1.2rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
@@ -348,7 +350,6 @@
         </nav>
     </header>
 
-    <!-- HOME PAGE -->
     <main id="home-page" class="page active">
         <div class="hero">
             <h1>Capture Moments<br>Like It's 1970's.</h1>
@@ -363,10 +364,8 @@
         </div>
     </main>
 
-    <!-- BOOTH PAGE -->
     <main id="booth-page" class="page">
         <div class="booth-container">
-            <!-- Sidebar Controls -->
             <div class="controls-panel">
                 <div class="control-group">
                     <h3>1. Choose Layout</h3>
@@ -396,12 +395,29 @@
                 <div class="control-group">
                     <h3>3. Select Frame</h3>
                     <div class="frame-options" id="frame-options-container">
-                        <!-- Injected via JS -->
+                        </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>4. Message</h3>
+                    <div class="layout-options">
+                        <div class="option-btn" onclick="setMessageMode('none')" id="btn-msg-none">
+                            <i class="fa-solid fa-ban"></i> Blank
+                        </div>
+                        <div class="option-btn selected" onclick="setMessageMode('custom')" id="btn-msg-custom">
+                            <i class="fa-solid fa-pen"></i> Custom
+                        </div>
                     </div>
+                    <input type="text" 
+                           id="custom-msg-input" 
+                           value="" 
+                           oninput="updateMessageText(this.value)"
+                           placeholder="Type your message..."
+                           style="width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: var(--font-body);"
+                    >
                 </div>
             </div>
 
-            <!-- Camera Viewfinder -->
             <div class="viewfinder-area filter-sepia" id="viewfinder">
                 <video id="webcam" autoplay playsinline muted></video>
                 <div class="flash-overlay" id="flash"></div>
@@ -414,7 +430,6 @@
         </div>
     </main>
 
-    <!-- RESULT PAGE -->
     <main id="result-page" class="page">
         <div class="result-container">
             <h2 style="font-family: var(--font-head); margin-bottom: 1rem;">Your Photo is Ready</h2>
@@ -433,18 +448,15 @@
         </div>
     </main>
 
-    <!-- GALLERY PAGE -->
     <main id="gallery-page" class="page">
         <h2 style="font-family: var(--font-head); text-align: center;">Photo Archive</h2>
         <div class="gallery-grid" id="gallery-grid">
-            <!-- Items injected via JS -->
-        </div>
+            </div>
         <div style="text-align: center; margin-top: 3rem;">
             <button class="btn btn-outline" onclick="localStorage.removeItem('retroPhotos'); loadGallery();">Clear All History</button>
         </div>
     </main>
 
-    <!-- ABOUT PAGE -->
     <main id="about-page" class="page">
         <div class="about-content">
             <div class="about-section">
@@ -491,198 +503,180 @@
             {
                 id: 'simple-white',
                 name: 'Classic White',
-                // Subtle paper texture
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fdfbf7'/%3E%3C/svg%3E`
             },
             {
                 id: 'evil-eye',
-                name: 'Evil Eye', // I renamed this from 'Classic White' to match the design
-                // Below is the URL-encoded version of the SVG generated in the previous step
-                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fdfbf7'/%3E%3Cg%3E%3Ccircle cx='50' cy='50' r='25' fill='%231A3C8C'/%3E%3Ccircle cx='50' cy='50' r='15' fill='%2387CEEB'/%3E%3Ccircle cx='50' cy='50' r='10' fill='%23FFFFFF'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='15' cy='20' r='20' fill='%231A3C8C'/%3E%3Ccircle cx='15' cy='20' r='12' fill='%2387CEEB'/%3E%3Ccircle cx='15' cy='20' r='8' fill='%23FFFFFF'/%3E%3Ccircle cx='15' cy='20' r='4' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='85' cy='25' r='22' fill='%231A3C8C'/%3E%3Ccircle cx='85' cy='25' r='13' fill='%2387CEEB'/%3E%3Ccircle cx='85' cy='25' r='9' fill='%23FFFFFF'/%3E%3Ccircle cx='85' cy='25' r='4.5' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='25' cy='80' r='24' fill='%231A3C8C'/%3E%3Ccircle cx='25' cy='80' r='14' fill='%2387CEEB'/%3E%3Ccircle cx='25' cy='80' r='9.5' fill='%23FFFFFF'/%3E%3Ccircle cx='25' cy='80' r='4.8' fill='%23000000'/%3E%3C/g%3E%3Cg%3E%3Ccircle cx='75' cy='75' r='23' fill='%231A3C8C'/%3E%3Ccircle cx='75' cy='75' r='13.5' fill='%2387CEEB'/%3E%3Ccircle cx='75' cy='75' r='9' fill='%23FFFFFF'/%3E%3Ccircle cx='75' cy='75' r='4.6' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E`
+                name: 'Evil Eye',
+                // Scattered eyes instead of grid
+                src: `data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='120' fill='%23fdfbf7'/%3E%3Cg transform='translate(30, 20) scale(0.8)'%3E%3Ccircle cx='0' cy='0' r='25' fill='%231A3C8C'/%3E%3Ccircle cx='0' cy='0' r='15' fill='%2387CEEB'/%3E%3Ccircle cx='0' cy='0' r='10' fill='%23FFFFFF'/%3E%3Ccircle cx='0' cy='0' r='5' fill='%23000000'/%3E%3C/g%3E%3Cg transform='translate(90, 40) scale(0.6)'%3E%3Ccircle cx='0' cy='0' r='25' fill='%231A3C8C'/%3E%3Ccircle cx='0' cy='0' r='15' fill='%2387CEEB'/%3E%3Ccircle cx='0' cy='0' r='10' fill='%23FFFFFF'/%3E%3Ccircle cx='0' cy='0' r='5' fill='%23000000'/%3E%3C/g%3E%3Cg transform='translate(40, 90) scale(0.7)'%3E%3Ccircle cx='0' cy='0' r='25' fill='%231A3C8C'/%3E%3Ccircle cx='0' cy='0' r='15' fill='%2387CEEB'/%3E%3Ccircle cx='0' cy='0' r='10' fill='%23FFFFFF'/%3E%3Ccircle cx='0' cy='0' r='5' fill='%23000000'/%3E%3C/g%3E%3Cg transform='translate(100, 100) scale(0.5)'%3E%3Ccircle cx='0' cy='0' r='25' fill='%231A3C8C'/%3E%3Ccircle cx='0' cy='0' r='15' fill='%2387CEEB'/%3E%3Ccircle cx='0' cy='0' r='10' fill='%23FFFFFF'/%3E%3Ccircle cx='0' cy='0' r='5' fill='%23000000'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'retro-stripes',
                 name: 'Retro Stripes',
-                // Vertical stripes
                 src: `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='%23fce4ec'/%3E%3Cpath d='M0 0h10v40H0zm20 0h10v40H20z' fill='%23f8bbd0' fill-opacity='0.6'/%3E%3C/svg%3E`
             },
             {
                 id: 'blue-geo',
                 name: 'Cool Geo',
-                // Blue geometric pattern
                 src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23e1f5fe'/%3E%3Cpath d='M0 0l30 30L0 60zM60 0L30 30l30 30z' fill='%23b3e5fc' fill-opacity='0.5'/%3E%3C/svg%3E`
             },
             {
                 id: 'pink-impasto',
                 name: 'Pink Hearts', 
-                // Recreating bg7 (Pink textured hearts)
-                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23dbc3d0'/%3E%3Cpath d='M30 30 Q30 10 50 25 Q70 10 70 30 Q70 50 50 70 Q30 50 30 30' fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'/%3E%3Cpath d='M-20 80 Q-20 60 0 75 Q20 60 20 80 Q20 100 0 120 Q-20 100 -20 80' fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'/%3E%3Cpath d='M80 80 Q80 60 100 75 Q120 60 120 80 Q120 100 100 120 Q80 100 80 80' fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'/%3E%3C/svg%3E`
+                // UPDATED: Scattered random positions and sizes
+                src: `data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='120' fill='%23dbc3d0'/%3E%3Cg fill='%23a64b6b' stroke='%23bf6b8a' stroke-width='2'%3E%3Cpath d='M30 30 Q30 10 50 25 Q70 10 70 30 Q70 50 50 70 Q30 50 30 30' transform='translate(-10, -10) scale(0.8) rotate(-15)'/%3E%3Cpath d='M30 30 Q30 10 50 25 Q70 10 70 30 Q70 50 50 70 Q30 50 30 30' transform='translate(60, 10) scale(0.6) rotate(20)'/%3E%3Cpath d='M30 30 Q30 10 50 25 Q70 10 70 30 Q70 50 50 70 Q30 50 30 30' transform='translate(20, 70) scale(0.9) rotate(5)'/%3E%3Cpath d='M30 30 Q30 10 50 25 Q70 10 70 30 Q70 50 50 70 Q30 50 30 30' transform='translate(70, 60) scale(0.5) rotate(-30)'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'boho-leaves',
                 name: 'Boho Leaves',
-                // Recreating bg3 (Abstract leaves)
                 src: `data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='120' fill='%23e8e6da'/%3E%3Cpath d='M60 120 C 30 100 10 60 60 10 C 110 60 90 100 60 120 Z' fill='%23a65e44' opacity='0.9'/%3E%3Cpath d='M60 120 L 60 20' stroke='%23e8e6da' stroke-width='2'/%3E%3C/svg%3E`
             },
             {
                 id: 'love-script',
                 name: 'Love Script',
-                // Recreating bg10 (Repeated text)
-                src: `data:image/svg+xml,%3Csvg width='100' height='50' viewBox='0 0 100 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='50' fill='%23f2efe9'/%3E%3Ctext x='50' y='35' font-family='cursive' font-weight='bold' font-size='30' text-anchor='middle' fill='%23b31b1b'%3Elove%3C/text%3E%3C/svg%3E`
+                // UPDATED: Scattered words
+                src: `data:image/svg+xml,%3Csvg width='150' height='150' viewBox='0 0 150 150' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='150' height='150' fill='%23f2efe9'/%3E%3Ctext x='30' y='40' font-family='cursive' font-weight='bold' font-size='24' fill='%23b31b1b' transform='rotate(-10 30 40)'%3Elove%3C/text%3E%3Ctext x='100' y='60' font-family='cursive' font-weight='bold' font-size='20' fill='%23b31b1b' transform='rotate(15 100 60)'%3Elove%3C/text%3E%3Ctext x='50' y='110' font-family='cursive' font-weight='bold' font-size='28' fill='%23b31b1b' transform='rotate(-5 50 110)'%3Elove%3C/text%3E%3Ctext x='110' y='130' font-family='cursive' font-weight='bold' font-size='18' fill='%23b31b1b' transform='rotate(10 110 130)'%3Elove%3C/text%3E%3C/svg%3E`
             },
             {
                 id: 'sketch-hearts',
                 name: 'Sketch Hearts',
-                // Recreating bg6 (Tiny scribbled hearts)
-                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23f7f7f7'/%3E%3Cg fill='none' stroke='%23ff8da1' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 10 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='scale(0.8)'/%3E%3Cpath d='M40 30 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='scale(1)'/%3E%3Cpath d='M20 50 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='scale(0.9)'/%3E%3C/g%3E%3C/svg%3E`
+                // UPDATED: Randomly placed scribbles
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f7f7f7'/%3E%3Cg fill='none' stroke='%23ff8da1' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M10 10 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='translate(10, 10) scale(1) rotate(-20)'/%3E%3Cpath d='M10 10 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='translate(70, 15) scale(0.8) rotate(30)'/%3E%3Cpath d='M10 10 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='translate(30, 60) scale(1.2) rotate(10)'/%3E%3Cpath d='M10 10 q-5-5 0-10 q5 5 5 10 q-5 5-5-10' transform='translate(80, 80) scale(0.9) rotate(-10)'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'kraft-red',
                 name: 'Kraft Love',
-                // Recreating bg9 (Brown paper red hearts)
-                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23d4bda5'/%3E%3Cg fill='%239e1b1b'%3E%3Cpath d='M10 20 Q10 10 20 20 Q30 10 30 20 Q30 30 20 40 Q10 30 10 20' transform='scale(0.5)'/%3E%3Cpath d='M90 60 Q90 50 100 60 Q110 50 110 60 Q110 70 100 80 Q90 70 90 60' transform='scale(0.5)'/%3E%3Cpath d='M60 90 Q60 80 70 90 Q80 80 80 90 Q80 100 70 110 Q60 100 60 90' transform='scale(0.6)'/%3E%3C/g%3E%3C/svg%3E`
+                // UPDATED: Scattered red hearts
+                src: `data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='120' fill='%23d4bda5'/%3E%3Cg fill='%239e1b1b'%3E%3Cpath d='M10 10 Q10 0 20 10 Q30 0 30 10 Q30 20 20 30 Q10 20 10 10' transform='translate(10, 20) scale(0.6)'/%3E%3Cpath d='M10 10 Q10 0 20 10 Q30 0 30 10 Q30 20 20 30 Q10 20 10 10' transform='translate(60, 10) scale(0.8) rotate(20)'/%3E%3Cpath d='M10 10 Q10 0 20 10 Q30 0 30 10 Q30 20 20 30 Q10 20 10 10' transform='translate(30, 80) scale(0.5) rotate(-15)'/%3E%3Cpath d='M10 10 Q10 0 20 10 Q30 0 30 10 Q30 20 20 30 Q10 20 10 10' transform='translate(90, 60) scale(0.7)'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'blue-plaid',
                 name: 'Blue Plaid',
-                // Recreating bg11 (Blue grid)
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3Crect x='0' y='20' width='100' height='15' fill='%23add8e6' opacity='0.6'/%3E%3Crect x='0' y='60' width='100' height='15' fill='%23add8e6' opacity='0.6'/%3E%3Crect x='20' y='0' width='15' height='100' fill='%2387cefa' opacity='0.6'/%3E%3Crect x='60' y='0' width='15' height='100' fill='%2387cefa' opacity='0.6'/%3E%3C/svg%3E`
             },
             {
+                id: 'cute-char',
+                name: 'Cute Friends',
+                // UPDATED: Scattered faces
+                src: `data:image/svg+xml,%3Csvg width='140' height='140' viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='140' height='140' fill='%23fceabb'/%3E%3Cg transform='translate(20,20)'%3E%3Ccircle cx='20' cy='20' r='18' fill='%23fff' stroke='%236d4c41' stroke-width='2'/%3E%3Ccircle cx='12' cy='18' r='2' fill='%236d4c41'/%3E%3Ccircle cx='28' cy='18' r='2' fill='%236d4c41'/%3E%3C/g%3E%3Cg transform='translate(80,60)'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23ffe082' stroke='%236d4c41' stroke-width='2'/%3E%3Ccircle cx='12' cy='18' r='2' fill='%236d4c41'/%3E%3Ccircle cx='28' cy='18' r='2' fill='%236d4c41'/%3E%3C/g%3E%3Cg transform='translate(30,90) scale(0.8)'%3E%3Ccircle cx='20' cy='20' r='18' fill='%23fff' stroke='%236d4c41' stroke-width='2'/%3E%3Ccircle cx='12' cy='18' r='2' fill='%236d4c41'/%3E%3Ccircle cx='28' cy='18' r='2' fill='%236d4c41'/%3E%3C/g%3E%3C/svg%3E`
+            },
+            {
                 id: 'retro-choco',
-                name: 'Choco Swirl',
-                // Recreating bg2 (Retro brown hearts)
-                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%234e342e'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%238d6e63' stroke-width='8'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%23d7ccc8' stroke-width='3' transform='scale(0.6) translate(35 35)'/%3E%3C/svg%3E`
+                name: 'Choco Hearts',
+                // UPDATED: Completely changed to scattered brown hearts instead of one swirl
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%234e342e'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%238d6e63' stroke-width='4' transform='translate(-20, -20) scale(0.4) rotate(-10)'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%23d7ccc8' stroke-width='4' transform='translate(40, 10) scale(0.5) rotate(20)'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%238d6e63' stroke-width='4' transform='translate(10, 50) scale(0.3) rotate(45)'/%3E%3Cpath d='M50 90 Q10 60 10 30 A20 20 0 0 1 50 30 A20 20 0 0 1 90 30 Q90 60 50 90' fill='none' stroke='%23d7ccc8' stroke-width='4' transform='translate(60, 60) scale(0.4) rotate(-15)'/%3E%3C/svg%3E`
             },
             {
                 id: 'line-leaves',
                 name: 'Line Art',
-                // Recreating bg5 (Minimalist leaves)
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f5f0eb'/%3E%3Cpath d='M50 100 Q50 50 90 10' fill='none' stroke='%23a1887f' stroke-width='1.5'/%3E%3Cpath d='M50 80 Q70 60 80 40' fill='none' stroke='%23a1887f' stroke-width='1'/%3E%3Cpath d='M50 60 Q30 40 20 20' fill='none' stroke='%23a1887f' stroke-width='1'/%3E%3C/svg%3E`
-            },
-            {
-                id: 'gold-speckle',
-                name: 'Gold Dust',
-                // Gold specs on cream
-                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23fff8e1'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23ffecb3'/%3E%3Ccircle cx='50' cy='40' r='3' fill='%23ffe082'/%3E%3Ccircle cx='20' cy='60' r='2' fill='%23ffecb3'/%3E%3Ccircle cx='70' cy='20' r='2' fill='%23ffe082'/%3E%3C/svg%3E`
             },
             {
                 id: 'cow-print',
                 name: 'Moo Print',
-                // Trendy Cow Pattern
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23ffffff'/%3E%3Cpath d='M10 10 Q20 0 30 10 Q40 20 30 30 Q20 40 10 30 Q0 20 10 10' fill='%23000000'/%3E%3Cpath d='M60 50 Q75 40 85 55 Q90 70 75 80 Q60 90 50 75 Q45 60 60 50' fill='%23000000'/%3E%3Cpath d='M80 10 Q95 5 100 20 L100 0 L80 0 Z' fill='%23000000'/%3E%3Cpath d='M10 80 Q25 70 35 85 Q40 95 30 100 L0 100 L0 90 Z' fill='%23000000'/%3E%3C/svg%3E`
             },
             {
                 id: 'dreamy-clouds',
                 name: 'Dreamy Sky',
-                // Soft blue sky with white clouds
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%2389CFF0'/%3E%3Cg fill='%23ffffff' opacity='0.8'%3E%3Ccircle cx='20' cy='30' r='10'/%3E%3Ccircle cx='35' cy='35' r='12'/%3E%3Ccircle cx='10' cy='35' r='8'/%3E%3Ccircle cx='25' cy='40' r='10'/%3E%3C/g%3E%3Cg fill='%23ffffff' opacity='0.8' transform='translate(50, 40)'%3E%3Ccircle cx='20' cy='30' r='10'/%3E%3Ccircle cx='35' cy='35' r='12'/%3E%3Ccircle cx='10' cy='35' r='8'/%3E%3Ccircle cx='25' cy='40' r='10'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'retro-checkers',
                 name: 'Vans Check',
-                // Classic Black & White Checkers
                 src: `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='%23ffffff'/%3E%3Crect width='20' height='20' fill='%231a1a1a'/%3E%3Crect x='20' y='20' width='20' height='20' fill='%231a1a1a'/%3E%3C/svg%3E`
             },
             {
                 id: 'groovy-waves',
                 name: '70s Groovy',
-                // Orange and yellow wavy lines
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fefae0'/%3E%3Cpath d='M0 20 Q25 40 50 20 T100 20' fill='none' stroke='%23e76f51' stroke-width='5'/%3E%3Cpath d='M0 40 Q25 60 50 40 T100 40' fill='none' stroke='%23f4a261' stroke-width='5'/%3E%3Cpath d='M0 60 Q25 80 50 60 T100 60' fill='none' stroke='%23e9c46a' stroke-width='5'/%3E%3Cpath d='M0 80 Q25 100 50 80 T100 80' fill='none' stroke='%232a9d8f' stroke-width='5'/%3E%3C/svg%3E`
             },
             {
                 id: 'happy-daisies',
                 name: 'Daisy Field',
-                // Green background with simple white flowers
-                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23a7c957'/%3E%3Cg transform='translate(30,30)'%3E%3Ccircle r='5' fill='%23ffe66d'/%3E%3Ccircle cx='0' cy='-8' r='4' fill='%23fff'/%3E%3Ccircle cx='6' cy='-5' r='4' fill='%23fff'/%3E%3Ccircle cx='7' cy='3' r='4' fill='%23fff'/%3E%3Ccircle cx='3' cy='8' r='4' fill='%23fff'/%3E%3Ccircle cx='-5' cy='7' r='4' fill='%23fff'/%3E%3Ccircle cx='-8' cy='0' r='4' fill='%23fff'/%3E%3Ccircle cx='-6' cy='-6' r='4' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E`
+                // UPDATED: Scattered flowers
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23a7c957'/%3E%3Cg transform='translate(20,20)'%3E%3Ccircle r='5' fill='%23ffe66d'/%3E%3Ccircle cx='0' cy='-8' r='4' fill='%23fff'/%3E%3Ccircle cx='6' cy='-5' r='4' fill='%23fff'/%3E%3Ccircle cx='7' cy='3' r='4' fill='%23fff'/%3E%3Ccircle cx='3' cy='8' r='4' fill='%23fff'/%3E%3Ccircle cx='-5' cy='7' r='4' fill='%23fff'/%3E%3Ccircle cx='-8' cy='0' r='4' fill='%23fff'/%3E%3Ccircle cx='-6' cy='-6' r='4' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate(70,60) scale(0.8)'%3E%3Ccircle r='5' fill='%23ffe66d'/%3E%3Ccircle cx='0' cy='-8' r='4' fill='%23fff'/%3E%3Ccircle cx='6' cy='-5' r='4' fill='%23fff'/%3E%3Ccircle cx='7' cy='3' r='4' fill='%23fff'/%3E%3Ccircle cx='3' cy='8' r='4' fill='%23fff'/%3E%3Ccircle cx='-5' cy='7' r='4' fill='%23fff'/%3E%3Ccircle cx='-8' cy='0' r='4' fill='%23fff'/%3E%3Ccircle cx='-6' cy='-6' r='4' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'cottage-shrooms',
                 name: 'Mushrooms',
-                // Cream bg with cute red mushrooms
-                src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23fefcf5'/%3E%3Cg transform='translate(15,35)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='6' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='14' cy='6' r='1' fill='white'/%3E%3C/g%3E%3Cg transform='translate(40,15) scale(0.8)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='10' cy='4' r='1.5' fill='white'/%3E%3C/g%3E%3C/svg%3E`
+                // UPDATED: Scattered mushrooms
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fefcf5'/%3E%3Cg transform='translate(20,20) rotate(-10)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='6' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='14' cy='6' r='1' fill='white'/%3E%3C/g%3E%3Cg transform='translate(70,50) scale(0.8) rotate(15)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='6' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='14' cy='6' r='1' fill='white'/%3E%3C/g%3E%3Cg transform='translate(30,80) scale(1.1) rotate(5)'%3E%3Crect x='7' y='10' width='6' height='8' fill='%23e6dac8'/%3E%3Cpath d='M0 10 Q10 -5 20 10' fill='%23d9534f'/%3E%3Ccircle cx='6' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='14' cy='6' r='1' fill='white'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'cherry-bomb',
                 name: 'Cherry Bomb',
-                // Soft pink with red cherries
-                src: `data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='50' height='50' fill='%23ffeef2'/%3E%3Cg transform='translate(15,15)'%3E%3Cpath d='M10 5 Q15 0 20 5 L20 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Cpath d='M10 5 L5 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='18' r='4' fill='%23e91e63'/%3E%3Ccircle cx='20' cy='18' r='4' fill='%23e91e63'/%3E%3C/g%3E%3C/svg%3E`
+                // UPDATED: Scattered cherries
+                src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23ffeef2'/%3E%3Cg transform='translate(10,10) rotate(-20)'%3E%3Cpath d='M10 5 Q15 0 20 5 L20 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Cpath d='M10 5 L5 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='18' r='4' fill='%23e91e63'/%3E%3Ccircle cx='20' cy='18' r='4' fill='%23e91e63'/%3E%3C/g%3E%3Cg transform='translate(60,40) rotate(15) scale(1.1)'%3E%3Cpath d='M10 5 Q15 0 20 5 L20 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Cpath d='M10 5 L5 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='18' r='4' fill='%23e91e63'/%3E%3Ccircle cx='20' cy='18' r='4' fill='%23e91e63'/%3E%3C/g%3E%3Cg transform='translate(30,70) rotate(-10) scale(0.9)'%3E%3Cpath d='M10 5 Q15 0 20 5 L20 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Cpath d='M10 5 L5 15' stroke='%234caf50' fill='none' stroke-width='1.5'/%3E%3Ccircle cx='5' cy='18' r='4' fill='%23e91e63'/%3E%3Ccircle cx='20' cy='18' r='4' fill='%23e91e63'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'fresh-lemons',
                 name: 'Lemonade',
-                // Mint green with yellow lemons
                 src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23e0f2f1'/%3E%3Cg transform='translate(10,10) rotate(45)'%3E%3Cellipse cx='15' cy='10' rx='10' ry='7' fill='%23ffeb3b'/%3E%3Ccircle cx='5' cy='10' r='1' fill='%23fbc02d'/%3E%3Ccircle cx='25' cy='10' r='1' fill='%23fbc02d'/%3E%3Cpath d='M15 3 Q20 0 25 3' fill='none' stroke='%234caf50' stroke-width='2'/%3E%3Cpath d='M15 3 Q10 0 15 -5 Q20 0 15 3' fill='%238bc34a'/%3E%3C/g%3E%3C/svg%3E`
             },
-
-            // --- Y2K & RETRO ---
             {
                 id: 'y2k-butterflies',
                 name: 'Fairycore',
-                // Lilac with purple butterflies
-                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23f3e5f5'/%3E%3Cg transform='translate(20,20)'%3E%3Cellipse cx='10' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(-30 10 10)'/%3E%3Cellipse cx='22' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(30 22 10)'/%3E%3Cellipse cx='12' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(-15 12 20)'/%3E%3Cellipse cx='20' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(15 20 20)'/%3E%3Crect x='15' y='8' width='2' height='16' rx='1' fill='%234a148c'/%3E%3C/g%3E%3C/svg%3E`
+                // UPDATED: Scattered butterflies
+                src: `data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='120' fill='%23f3e5f5'/%3E%3Cg transform='translate(20,20)'%3E%3Cellipse cx='10' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(-30 10 10)'/%3E%3Cellipse cx='22' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(30 22 10)'/%3E%3Cellipse cx='12' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(-15 12 20)'/%3E%3Cellipse cx='20' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(15 20 20)'/%3E%3Crect x='15' y='8' width='2' height='16' rx='1' fill='%234a148c'/%3E%3C/g%3E%3Cg transform='translate(80,70) scale(1.2) rotate(20)'%3E%3Cellipse cx='10' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(-30 10 10)'/%3E%3Cellipse cx='22' cy='10' rx='6' ry='8' fill='%23ba68c8' transform='rotate(30 22 10)'/%3E%3Cellipse cx='12' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(-15 12 20)'/%3E%3Cellipse cx='20' cy='20' rx='4' ry='6' fill='%23ab47bc' transform='rotate(15 20 20)'/%3E%3Crect x='15' y='8' width='2' height='16' rx='1' fill='%234a148c'/%3E%3C/g%3E%3C/svg%3E`
             },
             {
                 id: 'retro-smiley',
                 name: 'Happy Vibes',
-                // Yellow check with smileys
                 src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23fff9c4'/%3E%3Ccircle cx='30' cy='30' r='12' fill='%23ffeb3b'/%3E%3Ccircle cx='26' cy='28' r='1.5' fill='%23000'/%3E%3Ccircle cx='34' cy='28' r='1.5' fill='%23000'/%3E%3Cpath d='M26 34 Q30 38 34 34' stroke='%23000' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E`
             },
             {
                 id: 'yin-yang-90s',
                 name: '90s Balance',
-                // Purple background with Yin Yangs
                 src: `data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='50' height='50' fill='%23e1bee7'/%3E%3Cg transform='translate(15,15)'%3E%3Ccircle cx='10' cy='10' r='10' fill='white'/%3E%3Cpath d='M10 0 A10 10 0 0 1 10 20 A5 5 0 0 1 10 10 A5 5 0 0 0 10 0' fill='black'/%3E%3Ccircle cx='10' cy='5' r='1.5' fill='white'/%3E%3Ccircle cx='10' cy='15' r='1.5' fill='black'/%3E%3C/g%3E%3C/svg%3E`
             },
-
-            // --- AESTHETIC & TEXTURE ---
             {
                 id: 'terrazzo-stone',
                 name: 'Terrazzo',
-                // Modern stone speckles
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23f0f0f0'/%3E%3Cpath d='M10 10 L20 15 L15 25 L5 20 Z' fill='%23ef9a9a'/%3E%3Cpath d='M40 50 L50 40 L60 55 Z' fill='%2390caf9'/%3E%3Cpath d='M70 10 L80 10 L85 20 L75 25 Z' fill='%23a5d6a7'/%3E%3Cpath d='M20 70 L30 80 L10 85 Z' fill='%23ffcc80'/%3E%3Ccircle cx='50' cy='80' r='4' fill='%23bcaaa4'/%3E%3C/svg%3E`
             },
             {
                 id: 'midnight-stars',
                 name: 'Galaxy',
-                // Dark blue with gold stars
                 src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%231a237e'/%3E%3Cpath d='M40 20 L42 26 L48 26 L43 30 L45 36 L40 32 L35 36 L37 30 L32 26 L38 26 Z' fill='%23fff176'/%3E%3Ccircle cx='15' cy='60' r='1.5' fill='white' opacity='0.5'/%3E%3Ccircle cx='60' cy='10' r='1.5' fill='white' opacity='0.5'/%3E%3Cpath d='M70 60 L71 63 L74 63 L71.5 65 L72.5 68 L70 66 L67.5 68 L68.5 65 L66 63 L69 63 Z' fill='%23fff176' transform='scale(0.8)'/%3E%3C/svg%3E`
             },
             {
                 id: 'leopard-chic',
                 name: 'Wild Side',
-                // Beige animal print
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23d7ccc8'/%3E%3Cpath d='M20 20 Q25 15 30 20 Q30 25 25 25 Q20 25 20 20' fill='%235d4037'/%3E%3Cpath d='M60 40 Q65 35 70 45 Q60 55 55 45' fill='%235d4037'/%3E%3Cpath d='M10 70 Q15 65 20 75 Q15 85 10 75' fill='%235d4037'/%3E%3Cpath d='M80 80 Q90 75 95 85 Q90 95 80 90' fill='%235d4037'/%3E%3Ccircle cx='45' cy='25' r='3' fill='%238d6e63'/%3E%3Ccircle cx='75' cy='60' r='3' fill='%238d6e63'/%3E%3C/svg%3E`
             },
-
-            // --- MINIMALIST ---
             {
                 id: 'sage-grid',
                 name: 'Sage Graph',
-                // Aesthetic green grid
                 src: `data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='40' height='40' fill='%23f1f8e9'/%3E%3Cpath d='M0 0 L40 0' stroke='%23a5d6a7' stroke-width='1'/%3E%3Cpath d='M0 0 L0 40' stroke='%23a5d6a7' stroke-width='1'/%3E%3C/svg%3E`
             },
             {
                 id: 'organic-shapes',
                 name: 'Matisse',
-                // Abstract organic blobs
                 src: `data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='100' height='100' fill='%23fff3e0'/%3E%3Cpath d='M10 20 Q30 0 50 20 T90 20' fill='none' stroke='%23ffab91' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M20 60 Q40 40 60 60 T90 50' fill='none' stroke='%2380cbc4' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='30' cy='80' r='5' fill='%23ffab91'/%3E%3C/svg%3E`
             },
             {
                 id: 'cyber-glitch',
                 name: 'Cyberpunk',
-                // Black with neon green digital rain feel
                 src: `data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='60' height='60' fill='%23111'/%3E%3Crect x='10' y='10' width='5' height='15' fill='%230f0' opacity='0.7'/%3E%3Crect x='30' y='30' width='5' height='10' fill='%230f0' opacity='0.5'/%3E%3Crect x='50' y='5' width='5' height='20' fill='%230f0' opacity='0.3'/%3E%3Crect x='20' y='50' width='5' height='5' fill='%230f0' opacity='0.9'/%3E%3C/svg%3E`
+            },
+            {
+                id: 'gold-speckle',
+                name: 'Gold Dust',
+                src: `data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='80' height='80' fill='%23fff8e1'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23ffecb3'/%3E%3Ccircle cx='50' cy='40' r='3' fill='%23ffe082'/%3E%3Ccircle cx='20' cy='60' r='2' fill='%23ffecb3'/%3E%3Ccircle cx='70' cy='20' r='2' fill='%23ffe082'/%3E%3C/svg%3E`
             }
         ];
-
         /* --- STATE & VARIABLES --- */
         const state = {
             currentLayout: 'strip', // strip, grid, single
             currentFilter: 'sepia',
             currentFrameId: 'simple-white', 
             photos: [], // Stores temp blobs for current session
-            isCapturing: false
+            isCapturing: false,
+            // NEW: Message state
+            messageMode: 'custom', // 'none' or 'custom'
+            messageText: `RETRO BOOTH • ${new Date().toLocaleDateString()}` 
         };
 
         const elements = {
@@ -786,6 +780,27 @@
             state.currentFrameId = id;
         }
 
+        function setMessageMode(mode) {
+            state.messageMode = mode;
+            
+            // Update Button Styles
+            document.getElementById('btn-msg-none').classList.remove('selected');
+            document.getElementById('btn-msg-custom').classList.remove('selected');
+            document.getElementById('btn-msg-' + mode).classList.add('selected');
+
+            // Show/Hide Input Field
+            const inputField = document.getElementById('custom-msg-input');
+            if(mode === 'custom') {
+                inputField.style.display = 'block';
+            } else {
+                inputField.style.display = 'none';
+            }
+        }
+
+        function updateMessageText(text) {
+            state.messageText = text;
+        }
+
         /* --- CAPTURE SEQUENCE --- */
         async function startCaptureSequence() {
             if(state.isCapturing) return;
@@ -858,9 +873,9 @@
             // Find current frame asset
             const frameObj = frameAssets.find(f => f.id === state.currentFrameId) || frameAssets[0];
             
-            const photoW = 300;
-            const photoH = 300; 
-            const padding = 30;
+            const photoW = 192;
+            const photoH = 192; 
+            const padding = 25;
             const footerHeight = 80;
 
             let canvasW, canvasH;
@@ -924,20 +939,21 @@
                 });
             }
 
-             // Reset Filter for Text
-            //  ctx.filter = 'none';
+            // Reset Filter for Text
+            ctx.filter = 'none';
 
-            //  // Add Footer Date
-            //  ctx.font = 'bold 16px "Playfair Display"';
-            //  ctx.textAlign = 'center';
+            // Add Footer Message
+            ctx.font = 'bold 16px "Playfair Display"';
+            ctx.textAlign = 'center';
              
-            //  // Smart text color based on frame ID
-            //  if(frameObj.id === 'dark-film') ctx.fillStyle = '#aaa';
-            //  else ctx.fillStyle = '#333';
+            // Smart text color based on frame ID
+            if(frameObj.id === 'dark-film' || frameObj.id === 'cyber-glitch' || frameObj.id === 'midnight-stars') ctx.fillStyle = '#aaa';
+            else ctx.fillStyle = '#333';
 
-            //  const dateStr = new Date().toLocaleDateString();
-            //  const footerY = canvasH - (footerHeight/2) + 8;
-            //  ctx.fillText(`RETRO BOOTH • ${dateStr}`, canvasW / 2, footerY);
+            if (state.messageMode === 'custom') {
+                const footerY = canvasH - (footerHeight/2) + 8;
+                ctx.fillText(state.messageText, canvasW / 2, footerY);
+            }
 
             // Add Grain Overlay
             addNoiseToCanvas();
@@ -1047,6 +1063,9 @@
         }
 
         // Init
+        document.addEventListener('DOMContentLoaded', () => {
+           document.getElementById('custom-msg-input').value = state.messageText; 
+        });
         initFrameOptions();
         navTo('home');
 
