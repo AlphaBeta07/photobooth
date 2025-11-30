@@ -340,10 +340,10 @@
                     </div>
                 </div>
 
-                <div class="control-group">
+                <!-- <div class="control-group">
                     <h3>3. Decorate (Post-Snap)</h3>
                     <p style="font-size:0.8rem; color:#666;">Stickers available after photo is taken.</p>
-                </div>
+                </div> -->
             </div>
 
             <!-- Camera Viewfinder -->
@@ -368,8 +368,8 @@
                 <canvas id="resultCanvas"></canvas>
             </div>
 
-            <div class="controls-panel" style="margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-                <div class="sticker-tray">
+            <div class="controls-panel" style="margin-top: 2rem; max-width: auto; margin-left: auto; margin-right: auto;">
+                <!-- <div class="sticker-tray">
                     <div class="sticker-opt" onclick="addSticker('❤️')">❤️</div>
                     <div class="sticker-opt" onclick="addSticker('⭐')">⭐</div>
                     <div class="sticker-opt" onclick="addSticker('👑')">👑</div>
@@ -377,7 +377,7 @@
                     <div class="sticker-opt" onclick="addSticker('💋')">💋</div>
                     <div class="sticker-opt" onclick="addSticker('🔥')">🔥</div>
                     <div class="sticker-opt" onclick="addSticker('DATE')">📅</div>
-                </div>
+                </div> -->
                 <div style="display:flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
                     <button class="btn btn-outline" onclick="retake()">Retake</button>
                     <button class="btn" onclick="downloadImage()">Download</button>
@@ -442,7 +442,7 @@
         /* --- CAMERA LOGIC --- */
         async function startCamera() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 720, height: 720 }, audio: false });
                 elements.video.srcObject = stream;
             } catch (err) {
                 alert("Camera access denied or not available. Please allow camera permissions.");
@@ -548,8 +548,8 @@
             const layout = state.currentLayout;
             
             // Base config
-            const photoW = 400;
-            const photoH = 300; // 4:3 Aspect
+            const photoW = 300;
+            const photoH = 300; 
             const padding = 30;
             const border = 15;
             const headerHeight = 0;
@@ -610,17 +610,17 @@
             }
 
             // Reset Filter for Text/Logo
-            ctx.filter = 'none';
+            // ctx.filter = 'none';
 
-            // Add Logo/Date Footer
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 24px "Playfair Display"';
-            ctx.textAlign = 'center';
-            const dateStr = new Date().toLocaleDateString();
+            // // Add Logo/Date Footer
+            // ctx.fillStyle = '#333';
+            // ctx.font = 'bold 24px "Playfair Display"';
+            // ctx.textAlign = 'center';
+            // const dateStr = new Date().toLocaleDateString();
             
             // Draw text at bottom
-            const footerY = canvasH - (footerHeight/2) + 8;
-            ctx.fillText(`RETRO BOOTH • ${dateStr}`, canvasW / 2, footerY);
+            // const footerY = canvasH - (footerHeight/2) + 8;
+            // ctx.fillText(`RETRO BOOTH • ${dateStr}`, canvasW / 2, footerY);
 
             // Add Grain Overlay (Noise)
             addNoiseToCanvas();
@@ -722,14 +722,14 @@
                 div.innerHTML = `
                     <button class="delete-btn" onclick="deletePhoto(${item.id})">×</button>
                     <img src="${item.data}" alt="Photobooth Strip">
-                    <div class="gallery-date">${item.date}</div>
+                    
                 `;
                 div.onclick = (e) => {
                     if(!e.target.classList.contains('delete-btn')) {
                         // View large logic could go here
                         const link = document.createElement('a');
                         link.download = 'retro-photo.png';
-                        link.href = item.data;
+                        // link.href = item.data;
                         link.click();
                     }
                 };
