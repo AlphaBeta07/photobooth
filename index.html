@@ -367,23 +367,37 @@
     <main id="booth-page" class="page">
         <div class="booth-container">
             <div class="controls-panel">
+                <!-- Added Input Source Options -->
                 <div class="control-group">
-                    <h3>1. Choose Layout</h3>
+                    <h3>1. Input Method</h3>
+                    <div class="layout-options">
+                        <button class="option-btn" onclick="document.getElementById('file-upload').click()">
+                            <i class="fa-solid fa-upload"></i> Upload Files
+                        </button>
+                    </div>
+                    <p style="font-size: 0.75rem; color: #666; margin-top: 5px; font-style: italic;">
+                        Or use the shutter button for webcam
+                    </p>
+                    <input type="file" id="file-upload" multiple accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+                </div>
+
+                <div class="control-group">
+                    <h3>2. Choose Layout</h3>
                     <div class="layout-options">
                         <div class="option-btn selected" onclick="setLayout('strip')" id="btn-strip">
-                            <i class="fa-solid fa-film"></i> Strip
+                            <i class="fa-solid fa-film"></i> Strip (3)
                         </div>
                         <div class="option-btn" onclick="setLayout('grid')" id="btn-grid">
-                            <i class="fa-solid fa-border-all"></i> 2x2
+                            <i class="fa-solid fa-border-all"></i> 2x2 (4)
                         </div>
                         <div class="option-btn" onclick="setLayout('single')" id="btn-single">
-                            <i class="fa-regular fa-image"></i> Single
+                            <i class="fa-regular fa-image"></i> Single (1)
                         </div>
                     </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>2. Set Filter</h3>
+                    <h3>3. Set Filter</h3>
                     <div class="filter-options">
                         <div class="option-btn" onclick="setFilter('none')">Normal</div>
                         <div class="option-btn selected" onclick="setFilter('sepia')">Sepia</div>
@@ -393,13 +407,13 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>3. Select Frame</h3>
+                    <h3>4. Select Frame</h3>
                     <div class="frame-options" id="frame-options-container">
                         </div>
                 </div>
 
                 <div class="control-group">
-                    <h3>4. Message</h3>
+                    <h3>5. Message</h3>
                     <div class="layout-options">
                         <div class="option-btn" onclick="setMessageMode('none')" id="btn-msg-none">
                             <i class="fa-solid fa-ban"></i> Blank
@@ -749,8 +763,8 @@
                 stream = await navigator.mediaDevices.getUserMedia({ video: { width: 720, height: 720 }, audio: false });
                 elements.video.srcObject = stream;
             } catch (err) {
-                alert("Camera access denied or not available. Please allow camera permissions.");
-                console.error(err);
+                // If camera fails, users can still use upload, so we don't alert annoyingly unless trying to capture
+                console.log("Camera access denied or not available.");
             }
         }
 
@@ -801,8 +815,57 @@
             state.messageText = text;
         }
 
+        /* --- FILE UPLOAD LOGIC --- */
+        function handleFileUpload(input) {
+            const files = Array.from(input.files);
+            if (files.length === 0) return;
+
+            // Determine required count
+            let required = 1;
+            if (state.currentLayout === 'strip') required = 3;
+            if (state.currentLayout === 'grid') required = 4;
+
+            if (files.length !== required) {
+                alert(`For the "${state.currentLayout}" layout, please upload exactly ${required} images.`);
+                input.value = ''; // Reset input
+                return;
+            }
+
+            state.photos = [];
+            let loadedCount = 0;
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        state.photos.push(img);
+                        loadedCount++;
+                        if (loadedCount === required) {
+                            // All loaded
+                            processUploadedImages();
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            input.value = ''; // Reset for next time
+        }
+
+        async function processUploadedImages() {
+            await renderFinalComposition();
+            navTo('result');
+        }
+
+
         /* --- CAPTURE SEQUENCE --- */
         async function startCaptureSequence() {
+            // Check stream availability
+            if (!stream) {
+                alert("Camera not detected. Please upload files instead.");
+                return;
+            }
             if(state.isCapturing) return;
             state.isCapturing = true;
             state.photos = [];
@@ -913,13 +976,13 @@
 
             // Draw Photos
             if (layout === 'single') {
-                ctx.drawImage(photos[0], padding, padding, photoW, photoH);
+                drawImageCover(ctx, photos[0], padding, padding, photoW, photoH);
                 drawPhotoBorder(padding, padding, photoW, photoH);
             } 
             else if (layout === 'strip') {
                 let y = padding;
                 photos.forEach(photo => {
-                    ctx.drawImage(photo, padding, y, photoW, photoH);
+                    drawImageCover(ctx, photo, padding, y, photoW, photoH);
                     drawPhotoBorder(padding, y, photoW, photoH);
                     y += photoH + padding;
                 });
@@ -933,7 +996,7 @@
                 ];
                 photos.forEach((photo, i) => {
                     if(positions[i]) {
-                        ctx.drawImage(photo, positions[i].x, positions[i].y, photoW, photoH);
+                        drawImageCover(ctx, photo, positions[i].x, positions[i].y, photoW, photoH);
                         drawPhotoBorder(positions[i].x, positions[i].y, photoW, photoH);
                     }
                 });
@@ -957,6 +1020,34 @@
 
             // Add Grain Overlay
             addNoiseToCanvas();
+        }
+
+        // Helper: Draw image with object-fit: cover behavior
+        function drawImageCover(ctx, img, x, y, w, h) {
+            // Safe guard if img is null/undefined
+            if (!img) return;
+
+            let imgW = img.width;
+            let imgH = img.height;
+            let imgRatio = imgW / imgH;
+            let targetRatio = w / h;
+            let sx, sy, sw, sh;
+
+            if (imgRatio > targetRatio) {
+                // Image is wider than target: crop sides
+                sh = imgH;
+                sw = imgH * targetRatio;
+                sy = 0;
+                sx = (imgW - sw) / 2;
+            } else {
+                // Image is taller than target: crop top/bottom
+                sw = imgW;
+                sh = imgW / targetRatio;
+                sx = 0;
+                sy = (imgH - sh) / 2;
+            }
+            
+            ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
         }
 
         // Helper to load image for pattern
